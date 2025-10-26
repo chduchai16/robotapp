@@ -1,51 +1,64 @@
-import { AuthProvider } from '@/context/AuthContext';
+import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { auth } from '@/services/firebase';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { onAuthStateChanged } from 'firebase/auth';
-import { useEffect, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 import 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export const unstable_settings = {
   anchor: '(tabs)',
 };
 
-export default function RootLayout() {
+function RootLayoutNav() {
   const colorScheme = useColorScheme();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, loading } = useAuth();
+  const insets = useSafeAreaInsets();
 
-  useEffect(() => {
-    // Kiểm tra user đã đăng nhập
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setIsLoggedIn(!!user);
-      setIsLoading(false);
-    });
-
-    return unsubscribe;
-  }, []);
-
-  if (isLoading) {
+  if (loading) {
     return null; // Loading screen
   }
 
+  const isLoggedIn = !!user;
+
   return (
-    <AuthProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <View
+        style={[
+          styles.wrapper,
+          {
+            paddingTop: insets.top + 12,
+            paddingHorizontal: 16,
+          },
+        ]}>
         <Stack
           screenOptions={{
             headerShown: false,
-          }}>
+          }}
+          key={isLoggedIn ? 'logged-in' : 'logged-out'}>
           {!isLoggedIn ? (
             <Stack.Screen name="(auth)" options={{ headerShown: false }} />
           ) : (
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           )}
         </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
+      </View>
+      <StatusBar style="auto" />
+    </ThemeProvider>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <AuthProvider>
+      <RootLayoutNav />
     </AuthProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+  },
+});

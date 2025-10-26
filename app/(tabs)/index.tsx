@@ -1,24 +1,42 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { useAuth } from '@/context/AuthContext';
-import { StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-export default function HomeScreen() {
-  const { user } = useAuth();
+export default function RobotsScreen() {
+  // Demo data - danh sách robot
+  const robotList = [
+    { id: 1, name: 'Robot 1', status: 'Đang kết nối', ip: '192.168.1.100' },
+    { id: 2, name: 'Robot 2', status: 'Ngoại tuyến', ip: '192.168.1.101' },
+    { id: 3, name: 'Robot 3', status: 'Ngoại tuyến', ip: '192.168.1.102' },
+  ];
 
   return (
     <ThemedView style={styles.container}>
-      <View style={styles.infoBox}>
-        <ThemedText style={styles.infoTitle}>Chào mừng đến ứng dụng</ThemedText>
-        <ThemedText style={styles.infoText}>
-          Bạn đã đăng nhập thành công. Hãy khám phá ứng dụng và tận hưởng các tính năng của nó.
-        </ThemedText>
+      <View style={styles.header}>
+        <ThemedText style={styles.title}>Danh sách Robot</ThemedText>
       </View>
 
-      <View style={styles.userInfo}>
-        <ThemedText style={styles.label}>ID người dùng:</ThemedText>
-        <ThemedText style={styles.value}>{user?.uid}</ThemedText>
-      </View>
+      <ScrollView style={styles.content}>
+        {robotList.map((robot) => (
+          <TouchableOpacity key={robot.id} style={styles.robotCard}>
+            <View style={styles.robotHeader}>
+              <ThemedText style={styles.robotName}>{robot.name}</ThemedText>
+              <View
+                style={[
+                  styles.statusBadge,
+                  robot.status === 'Đang kết nối' ? styles.statusOnline : styles.statusOffline,
+                ]}
+              >
+                <ThemedText style={styles.statusText}>{robot.status}</ThemedText>
+              </View>
+            </View>
+            <ThemedText style={styles.robotIp}>IP: {robot.ip}</ThemedText>
+            <TouchableOpacity style={styles.connectButton}>
+              <Text style={styles.connectButtonText}>Kết nối</Text>
+            </TouchableOpacity>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
     </ThemedView>
   );
 }
@@ -27,31 +45,69 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  header: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
   content: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingVertical: 30,
-    justifyContent: 'center',
+    padding: 16,
   },
-  name: {
-    fontSize: 18,
-    opacity: 0.7,
-  },
-  infoBox: {
-    backgroundColor: '#f0f0f0',
+  robotCard: {
+    borderWidth: 1,
+    borderColor: '#ddd',
     borderRadius: 12,
     padding: 16,
-    marginBottom: 40,
+    marginBottom: 12,
+    backgroundColor: '#f9f9f9',
   },
-  infoTitle: {
-    fontSize: 16,
-    fontWeight: '600',
+  robotHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 8,
   },
-  infoText: {
+  robotName: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  statusBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  statusOnline: {
+    backgroundColor: '#34C759',
+  },
+  statusOffline: {
+    backgroundColor: '#FF3B30',
+  },
+  statusText: {
+    fontSize: 12,
+    color: '#fff',
+    fontWeight: '600',
+  },
+  robotIp: {
     fontSize: 14,
-    lineHeight: 20,
-    opacity: 0.8,
+    opacity: 0.7,
+    marginBottom: 12,
+  },
+  connectButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  connectButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
   },
   userInfo: {
     backgroundColor: '#f9f9f9',
@@ -71,3 +127,4 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
 });
+

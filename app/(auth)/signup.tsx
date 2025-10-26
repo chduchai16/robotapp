@@ -35,6 +35,7 @@ export default function SignupScreen() {
             Alert.alert('Thành công', 'Đăng ký thành công!');
             router.replace('/(tabs)');
         } catch (error: any) {
+            console.log('Lỗi đăng ký:', error); // Log lỗi chi tiết
             let errorMessage = 'Đăng ký thất bại';
 
             if (error.code === 'auth/email-already-in-use') {
@@ -43,6 +44,8 @@ export default function SignupScreen() {
                 errorMessage = 'Email không hợp lệ';
             } else if (error.code === 'auth/weak-password') {
                 errorMessage = 'Mật khẩu quá yếu';
+            } else {
+                errorMessage = error.message || errorMessage;
             }
 
             Alert.alert('Lỗi', errorMessage);
@@ -54,10 +57,10 @@ export default function SignupScreen() {
     return (
         <ThemedView style={styles.container}>
             <View style={styles.content}>
-                <ThemedText style={styles.title}>Đăng ký tài khoản</ThemedText>
+                <ThemedText style={styles.title}>Đăng Ký</ThemedText>
                 <TextInput
                     style={styles.input}
-                    placeholder="Tài khoản"
+                    placeholder="Email"
                     placeholderTextColor="#999"
                     value={email}
                     onChangeText={setEmail}
@@ -113,11 +116,11 @@ export default function SignupScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
         paddingHorizontal: 24,
     },
     content: {
         gap: 20,
+        marginTop: 100,
     },
     title: {
         fontSize: 20,

@@ -1,16 +1,26 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useAuth } from '@/context/AuthContext';
+import { authStorage } from '@/services/authStorage';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login } = useAuth();
+    const { login, user } = useAuth();
     const router = useRouter();
+
+    useEffect(() => {
+        // Khi login thành công, user được set từ Firebase
+        if (user && user.uid) {
+            // Lưu vào storage
+            authStorage.saveUser(user.uid);
+            router.replace('/(tabs)');
+        }
+    }, [user, router]);
 
     const handleLogin = async () => {
         if (!email || !password) {
@@ -21,7 +31,6 @@ export default function LoginScreen() {
         setLoading(true);
         try {
             await login(email, password);
-            router.replace('/(tabs)');
         } catch (error: any) {
             let errorMessage = 'Đăng nhập thất bại';
 
@@ -34,7 +43,6 @@ export default function LoginScreen() {
             }
 
             Alert.alert('Lỗi', errorMessage);
-        } finally {
             setLoading(false);
         }
     };
@@ -46,7 +54,7 @@ export default function LoginScreen() {
 
                 <TextInput
                     style={styles.input}
-                    placeholder="Tài khoản"
+                    placeholder="Email"
                     placeholderTextColor="#999"
                     value={email}
                     onChangeText={setEmail}
@@ -91,17 +99,23 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
         paddingHorizontal: 24,
     },
     content: {
         gap: 20,
+        marginTop: 100,
     },
     title: {
         fontSize: 20,
         fontWeight: 'bold',
         marginBottom: 8,
         textAlign: 'center',
+    },
+    subtitle: {
+        fontSize: 14,
+        opacity: 0.6,
+        textAlign: 'center',
+        marginBottom: 16,
     },
     input: {
         borderWidth: 1,
