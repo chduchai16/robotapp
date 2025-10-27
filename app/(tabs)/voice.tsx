@@ -1,9 +1,14 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'expo-router';
 import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 export default function VoiceControlScreen() {
+    const { logout } = useAuth();
+    const router = useRouter();
+
     const handleMicrophone = () => {
         Alert.alert('Voice Control', 'Tính năng voice control đang trong giai đoạn demo');
     };
@@ -12,10 +17,32 @@ export default function VoiceControlScreen() {
         Alert.alert('Lệnh', `Lệnh: ${command}`);
     };
 
+    const handleLogout = async () => {
+        Alert.alert(
+            'Đăng xuất',
+            'Bạn chắc chắn muốn đăng xuất?',
+            [
+                { text: 'Hủy', style: 'cancel' },
+                {
+                    text: 'Đăng xuất',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            await logout();
+                            router.replace('/(auth)/login');
+                        } catch {
+                            Alert.alert('Lỗi', 'Không thể đăng xuất');
+                        }
+                    },
+                },
+            ]
+        );
+    };
+
     return (
         <ThemedView style={styles.container}>
             <View style={styles.header}>
-                <ThemedText style={styles.title}>Điều khiển bằng âm thanh</ThemedText>
+                <ThemedText style={styles.title}>Điều khiển thiết bị đang kết nối</ThemedText>
             </View>
 
             <View style={styles.content}>
@@ -75,6 +102,12 @@ export default function VoiceControlScreen() {
                         <ThemedText style={styles.commandText}>Xoay</ThemedText>
                     </TouchableOpacity>
                 </View>
+            </View>
+
+            <View style={styles.logoutSection}>
+                <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+                    <ThemedText style={styles.logoutButtonText}>Đăng xuất</ThemedText>
+                </TouchableOpacity>
             </View>
         </ThemedView>
     );
@@ -144,5 +177,24 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         marginTop: 8,
         textAlign: 'center',
+    },
+    logoutButton: {
+        backgroundColor: '#FF3B30',
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        borderRadius: 8,
+        alignItems: 'center',
+    },
+    logoutButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    logoutSection: {
+        paddingHorizontal: 16,
+        paddingVertical: 20,
+        paddingBottom: 24,
+        borderTopWidth: 1,
+        borderTopColor: '#ddd',
     },
 });

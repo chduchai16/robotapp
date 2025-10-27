@@ -57,7 +57,7 @@ export default function SignupScreen() {
     return (
         <ThemedView style={styles.container}>
             <View style={styles.content}>
-                <ThemedText style={styles.title}>Đăng Ký</ThemedText>
+                <ThemedText style={styles.title}>Đăng ký</ThemedText>
                 <TextInput
                     style={styles.input}
                     placeholder="Email"
