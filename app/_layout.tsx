@@ -13,14 +13,14 @@ export const unstable_settings = {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
-  const { user, loading } = useAuth();
+  const { idToken, loading } = useAuth();
   const insets = useSafeAreaInsets();
 
   if (loading) {
     return null; // Loading screen
   }
 
-  const isLoggedIn = !!user;
+  const isLoggedIn = !!idToken;
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>

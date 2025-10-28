@@ -1,5 +1,7 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { RobotService } from '@/services/robot-service';
+import { useEffect } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function RobotsScreen() {
@@ -9,6 +11,16 @@ export default function RobotsScreen() {
     { id: 2, name: 'Robot 2', status: 'Ngoại tuyến', ip: '192.168.1.101' },
     { id: 3, name: 'Robot 3', status: 'Ngoại tuyến', ip: '192.168.1.102' },
   ];
+
+  const robotService = new RobotService() ;
+
+  useEffect(() => {
+    const fetchRobots = async () => {
+      const robots = await robotService.getRobots();
+      console.log(robots);
+    }
+    fetchRobots();
+  } , []);
 
   return (
     <ThemedView style={styles.container}>

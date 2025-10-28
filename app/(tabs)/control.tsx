@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'expo-router';
 import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native';
 
-export default function VoiceControlScreen() {
+export default function ControlScreen() {
     const { logout } = useAuth();
     const router = useRouter();
 

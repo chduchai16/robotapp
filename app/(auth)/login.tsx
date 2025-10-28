@@ -1,7 +1,6 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useAuth } from '@/context/AuthContext';
-import { authStorage } from '@/services/authStorage';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -10,17 +9,15 @@ export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login, user } = useAuth();
+    const { login, idToken } = useAuth();
     const router = useRouter();
 
     useEffect(() => {
-        // Khi login thành công, user được set từ Firebase
-        if (user && user.uid) {
-            // Lưu vào storage
-            authStorage.saveUser(user.uid);
+        // Khi login thành công, idToken được set trong AuthContext
+        if (idToken) {
             router.replace('/(tabs)');
         }
-    }, [user, router]);
+    }, [idToken, router]);
 
     const handleLogin = async () => {
         if (!email || !password) {
