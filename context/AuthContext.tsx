@@ -1,4 +1,5 @@
-import { auth } from '@/services/firebase';
+import { auth } from '@/library/services/firebase';
+import TokenRefreshService from '@/library/services/token-refresh-service';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
     createUserWithEmailAndPassword,
@@ -54,6 +55,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return unsubscribe;
     }, []);
 
+    // useEffect riêng để khởi động TokenRefreshService tự động
+    useEffect(() => {
+        const tokenRefreshService = TokenRefreshService.getInstance();
+
+        // Callback khi token hết hạn - chỉ set idToken = null, không gọi logout
+        tokenRefreshService.setOnTokenExpired(() => {
+            console.log('Token hết hạn, redirect đến login');
+            setIdToken(null);
+        });
+
+        tokenRefreshService.start();
+        // Cleanup khi component unmount
+        return () => {
+            tokenRefreshService.stop();
+        };
+    }, []);
+
     const signup = async (email: string, password: string) => {
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -61,6 +79,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 const token = await userCredential.user.getIdToken();
                 setIdToken(token);
                 await AsyncStorage.setItem(TOKEN_KEY, token);
+
+                // Khởi động service
+                const tokenRefreshService = TokenRefreshService.getInstance();
+                tokenRefreshService.start();
             } catch (e) {
                 console.error('Lỗi lấy idToken sau signup:', e);
             }
@@ -76,6 +98,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 const token = await userCredential.user.getIdToken();
                 setIdToken(token);
                 await AsyncStorage.setItem(TOKEN_KEY, token);
+
+                // Khởi động service
+                const tokenRefreshService = TokenRefreshService.getInstance();
+                tokenRefreshService.start();
             } catch (e) {
                 console.error('Lỗi lấy idToken sau login:', e);
             }
@@ -90,6 +116,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setIdToken(null);
             try {
                 await AsyncStorage.removeItem(TOKEN_KEY);
+                // Dừng TokenRefreshService khi logout
+                const tokenRefreshService = TokenRefreshService.getInstance();
+                tokenRefreshService.stop();
             } catch (e) {
                 console.error('Lỗi xóa token storage khi logout:', e);
             }

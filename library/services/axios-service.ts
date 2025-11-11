@@ -1,6 +1,6 @@
 // lib/axios.ts
 import axios from "axios";
-import { backendBaseURL } from "@/consts/app-constants";
+import { backendBaseURL } from "@/library/consts/app-constants";
 
 const httpMethod = axios.create({
   baseURL: backendBaseURL,
@@ -11,7 +11,7 @@ const httpMethod = axios.create({
 
 // Giữ lại interceptor phản hồi để xử lý lỗi chung
 httpMethod.interceptors.response.use(
-  (response) => response.data,
+  (response) => response,
   (error) => {
     const errorMsg =
       error.response?.data?.message ||

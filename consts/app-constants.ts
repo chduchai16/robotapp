@@ -1,1 +1,0 @@
-export const backendBaseURL = 'https://robot.skteam.studio/api/';

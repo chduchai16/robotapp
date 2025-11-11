@@ -1,4 +1,5 @@
 import { AuthProvider, useAuth } from '@/context/AuthContext';
+import { RobotProvider } from '@/context/RobotContext';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
@@ -52,7 +53,9 @@ function RootLayoutNav() {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <RootLayoutNav />
+      <RobotProvider>
+        <RootLayoutNav />
+      </RobotProvider>
     </AuthProvider>
   );
 }
