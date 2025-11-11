@@ -2,16 +2,47 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useAuth } from '@/context/AuthContext';
+import { VoiceService } from '@/library/services/voice-service';
+import { Audio as ExpoAudio } from 'expo-av';
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 export default function ControlScreen() {
     const { logout } = useAuth();
     const router = useRouter();
+    const voiceService = VoiceService.getInstance();
 
-    const handleMicrophone = () => {
-        Alert.alert('Voice Control', 'Tính năng voice control đang trong giai đoạn demo');
+    const [isRecording, setIsRecording] = useState(false);
+
+    const handleMicrophone = async () => {
+        try {
+            if (!isRecording) {
+                // Request microphone permission
+                const { status } = await ExpoAudio.requestPermissionsAsync();
+                if (status !== 'granted') {
+                    Alert.alert('Lỗi', 'Cần cấp quyền sử dụng microphone');
+                    return;
+                }
+
+                setIsRecording(true);
+                await voiceService.startRecording();
+            } else {
+                setIsRecording(false);
+                const text = await voiceService.stopRecording();
+
+                if (text.trim().length > 0) {
+                    Alert.alert("Kết quả giọng nói", text);
+                } else {
+                    Alert.alert("Không nhận được giọng nói", "Hãy thử lại.");
+                }
+            }
+        } catch (error) {
+            Alert.alert("Lỗi", "Không thể sử dụng microphone");
+            console.error("Lỗi microphone:", error);
+        }
     };
+
 
     const handleCommand = (command: string) => {
         Alert.alert('Lệnh', `Lệnh: ${command}`);
@@ -48,8 +79,13 @@ export default function ControlScreen() {
             <View style={styles.content}>
                 {/* Microphone Button */}
                 <TouchableOpacity style={styles.microphoneButton} onPress={handleMicrophone}>
-                    <IconSymbol size={60} name="mic.fill" color="#fff" />
+                    <IconSymbol
+                        size={60}
+                        name={isRecording ? "mic.slash.fill" : "mic.fill"}
+                        color="#fff"
+                    />
                 </TouchableOpacity>
+
 
                 {/* Commands Grid */}
                 <ThemedText style={styles.sectionTitle}>Các lệnh nhanh</ThemedText>

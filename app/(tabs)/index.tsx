@@ -1,11 +1,13 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { useAuth } from '@/context/AuthContext';
 import { useRobot } from '@/context/RobotContext';
 import { RobotService } from '@/library/services/robot-service';
 import { useEffect, useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function RobotsScreen() {
+  const { idToken } = useAuth();
   const robotService = useMemo(() => new RobotService(), []);
   const { connectedRobotId, setConnectedRobotId, disconnectRobot } = useRobot();
   const [robots, setRobots] = useState<Record<string, string>>({});
@@ -13,6 +15,12 @@ export default function RobotsScreen() {
   useEffect(() => {
     const fetchRobots = async () => {
       try {
+        // Check token trước khi gọi API
+        if (!idToken) {
+          console.log('Không có token, bỏ qua fetch robots');
+          return;
+        }
+
         const response = await robotService.getRobots();
         const robotsData = response.robots; // { robot_1: "available", robot_2: "available", ... }
         setRobots(robotsData);
@@ -21,7 +29,7 @@ export default function RobotsScreen() {
       }
     }
     fetchRobots();
-  }, [robotService]);
+  }, [robotService, idToken]);
 
   const robotEntries = Object.entries(robots); // Convert { robot_1: "available", ... } to [["robot_1", "available"], ...]
 
