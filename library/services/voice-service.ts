@@ -28,7 +28,6 @@ export class VoiceService {
             try {
                 await this.recording.stopAndUnloadAsync();
             } catch (e) {
-                console.log('Cleanup recording cũ:', e);
             }
             this.recording = null;
         }
@@ -42,7 +41,6 @@ export class VoiceService {
         );
 
         await this.recording.startAsync();
-        console.log('Bắt đầu ghi âm...');
     }
 
     async stopRecording(): Promise<string> {
@@ -53,13 +51,10 @@ export class VoiceService {
         this.recording = null;
 
         if (!uri) {
-            console.log('Không có audio file');
             return "Không có audio file";
         }
 
         try {
-            console.log('Gửi audio tới Gemini...');
-
             if (!this.geminiClient) {
                 throw new Error('Gemini API Key không được set. Thêm EXPO_PUBLIC_GEMINI_API_KEY vào .env');
             }
@@ -85,7 +80,6 @@ export class VoiceService {
             ]);
 
             const transcribedText = result.response.text();
-            console.log('Kết quả:', transcribedText);
             return transcribedText;
 
         } catch (error: any) {

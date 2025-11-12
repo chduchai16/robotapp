@@ -13,12 +13,6 @@ const httpMethod = axios.create({
 httpMethod.interceptors.response.use(
   (response) => response,
   (error) => {
-    const errorMsg =
-      error.response?.data?.message ||
-      error.response?.data?.error ||
-      "Có lỗi xảy ra, vui lòng thử lại";
-
-    console.log("API Error:", errorMsg);
     return Promise.reject(error.response?.data || error);
   }
 );

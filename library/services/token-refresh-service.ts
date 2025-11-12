@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const TOKEN_KEY = 'id_token';
-const REFRESH_INTERVAL = 1000 * 60 * 5; // 5 phút
+const REFRESH_INTERVAL = 1000 * 5; // 1 phút
 
 type OnTokenExpiredCallback = () => void;
 
@@ -33,7 +33,6 @@ class TokenRefreshService {
 
             // Nếu không có token
             if (!token) {
-                console.log('Token hết hạn');
                 if (this.onTokenExpired) {
                     this.onTokenExpired();
                 }
@@ -47,7 +46,6 @@ class TokenRefreshService {
 
             // Nếu token hết hạn
             if (timeUntilExpiry <= 0) {
-                console.log('Token hết hạn');
                 if (this.onTokenExpired) {
                     this.onTokenExpired();
                 }
@@ -62,12 +60,12 @@ class TokenRefreshService {
         try {
             const parts = token.split('.');
             if (parts.length !== 3) {
+                console.error('Token format invalid');
                 return 0;
             }
 
-            const payload = JSON.parse(
-                Buffer.from(parts[1], 'base64').toString('utf-8')
-            );
+            // Decode JWT payload - works on both web and native
+            const payload = JSON.parse(atob(parts[1]));
             const expiryMs = payload.exp * 1000;
             return expiryMs;
         } catch (error) {

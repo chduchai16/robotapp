@@ -35,7 +35,6 @@ export default function SignupScreen() {
             Alert.alert('Thành công', 'Đăng ký thành công!');
             router.replace('/(tabs)');
         } catch (error: any) {
-            console.log('Lỗi đăng ký:', error); // Log lỗi chi tiết
             let errorMessage = 'Đăng ký thất bại';
 
             if (error.code === 'auth/email-already-in-use') {

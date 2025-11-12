@@ -17,12 +17,11 @@ export default function RobotsScreen() {
       try {
         // Check token trước khi gọi API
         if (!idToken) {
-          console.log('Không có token, bỏ qua fetch robots');
           return;
         }
 
         const response = await robotService.getRobots();
-        const robotsData = response.robots; // { robot_1: "available", robot_2: "available", ... }
+        const robotsData = response.robots; 
         setRobots(robotsData);
       } catch (error) {
         console.error('Lỗi fetch robots:', error);
@@ -31,7 +30,7 @@ export default function RobotsScreen() {
     fetchRobots();
   }, [robotService, idToken]);
 
-  const robotEntries = Object.entries(robots); // Convert { robot_1: "available", ... } to [["robot_1", "available"], ...]
+  const robotEntries = Object.entries(robots); 
 
   return (
     <ThemedView style={styles.container}>
@@ -47,7 +46,7 @@ export default function RobotsScreen() {
           robotEntries.map(([robotId, status]) => {
             const isAvailable = status.toLowerCase() === 'available';
             const isConnected = connectedRobotId === robotId;
-            const displayName = robotId.replace('_', ' ').toUpperCase(); // "robot_1" -> "ROBOT 1"
+            const displayName = robotId.replace('_', ' ').toUpperCase(); 
 
             const handleConnectPress = () => {
               if (isConnected) {

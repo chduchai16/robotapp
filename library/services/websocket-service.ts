@@ -8,7 +8,6 @@ export class WebSocketService {
                 this.ws = new WebSocket(url);
 
                 this.ws.onopen = () => {
-                    console.log(`WebSocket kết nối thành công đến robot ${robotId}`);
                     this.emit('connected', { robotId, timestamp: Date.now() });
                     resolve({ status: 'connected', robotId });
                 };
@@ -16,7 +15,6 @@ export class WebSocketService {
                 this.ws.onmessage = (event) => {
                     try {
                         const data = JSON.parse(event.data);
-                        console.log('Nhận phản hồi từ robot:', data);
                         this.emit('message', data);
                     } catch (e) {
                         console.error('Lỗi parse WebSocket message:', e);
@@ -30,7 +28,6 @@ export class WebSocketService {
                 };
 
                 this.ws.onclose = () => {
-                    console.log(`WebSocket đóng kết nối với robot ${robotId}`);
                     this.emit('disconnected', { robotId, timestamp: Date.now() });
                     this.ws = null;
                 };
@@ -56,7 +53,6 @@ export class WebSocketService {
         };
 
         this.ws.send(JSON.stringify(message));
-        console.log(`Gửi lệnh: ${command}`, params);
     }
 
     // Đóng kết nối WebSocket
