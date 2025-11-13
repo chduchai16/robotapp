@@ -1,9 +1,9 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useAuth } from '@/context/AuthContext';
 import { useRobot } from '@/context/RobotContext';
 import { VoiceService } from '@/library/services/voice-service';
+import { FontAwesome5 } from '@expo/vector-icons';
 import { Audio as ExpoAudio } from 'expo-av';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -201,9 +201,9 @@ export default function ControlScreen() {
             <View style={styles.content}>
                 {/* Microphone Button */}
                 <TouchableOpacity style={styles.microphoneButton} onPress={handleMicrophone}>
-                    <IconSymbol
+                    <FontAwesome5
                         size={60}
-                        name={isRecording ? "mic.slash.fill" : "mic.fill"}
+                        name={isRecording ? "microphone-slash" : "microphone"}
                         color="#fff"
                     />
                 </TouchableOpacity>
@@ -216,7 +216,7 @@ export default function ControlScreen() {
                         style={styles.commandButton}
                         onPress={() => handleCommand('Tiến lên')}
                     >
-                        <IconSymbol size={32} name="arrow.up.circle.fill" color="#007AFF" />
+                        <FontAwesome5 size={32} name="arrow-up" color="#007AFF" />
                         <ThemedText style={styles.commandText}>Tiến</ThemedText>
                     </TouchableOpacity>
 
@@ -224,7 +224,7 @@ export default function ControlScreen() {
                         style={styles.commandButton}
                         onPress={() => handleCommand('Lùi lại')}
                     >
-                        <IconSymbol size={32} name="arrow.down.circle.fill" color="#007AFF" />
+                        <FontAwesome5 size={32} name="arrow-down" color="#007AFF" />
                         <ThemedText style={styles.commandText}>Lùi</ThemedText>
                     </TouchableOpacity>
 
@@ -232,7 +232,7 @@ export default function ControlScreen() {
                         style={styles.commandButton}
                         onPress={() => handleCommand('Quay trái')}
                     >
-                        <IconSymbol size={32} name="arrow.left.circle.fill" color="#007AFF" />
+                        <FontAwesome5 size={32} name="arrow-left" color="#007AFF" />
                         <ThemedText style={styles.commandText}>Trái</ThemedText>
                     </TouchableOpacity>
 
@@ -240,7 +240,7 @@ export default function ControlScreen() {
                         style={styles.commandButton}
                         onPress={() => handleCommand('Quay phải')}
                     >
-                        <IconSymbol size={32} name="arrow.right.circle.fill" color="#007AFF" />
+                        <FontAwesome5 size={32} name="arrow-right" color="#007AFF" />
                         <ThemedText style={styles.commandText}>Phải</ThemedText>
                     </TouchableOpacity>
 
@@ -248,7 +248,7 @@ export default function ControlScreen() {
                         style={styles.commandButton}
                         onPress={() => handleCommand('Xoay phải 90°')}
                     >
-                        <IconSymbol size={32} name="rotate.right.fill" color="#34C759" />
+                        <FontAwesome5 size={32} name="redo" color="#34C759" />
                         <ThemedText style={styles.commandText}>Xoay phải 90°</ThemedText>
                     </TouchableOpacity>
 
@@ -256,7 +256,7 @@ export default function ControlScreen() {
                         style={styles.commandButton}
                         onPress={() => handleCommand('Xoay trái 90°')}
                     >
-                        <IconSymbol size={32} name="rotate.left.fill" color="#34C759" />
+                        <FontAwesome5 size={32} name="undo" color="#34C759" />
                         <ThemedText style={styles.commandText}>Xoay trái 90°</ThemedText>
                     </TouchableOpacity>
 
@@ -264,7 +264,7 @@ export default function ControlScreen() {
                         style={styles.commandButton}
                         onPress={() => handleCommand('Dừng lại')}
                     >
-                        <IconSymbol size={32} name="stop.circle.fill" color="#FF3B30" />
+                        <FontAwesome5 size={32} name="stop-circle" color="#FF3B30" />
                         <ThemedText style={styles.commandText}>Dừng</ThemedText>
                     </TouchableOpacity>
                 </View>

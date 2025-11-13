@@ -7,7 +7,6 @@ import { StatusBar } from 'expo-status-bar';
 import React, { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Expo router config (optional)
 export const unstable_settings = {
@@ -17,7 +16,6 @@ export const unstable_settings = {
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
   const { isAuthenticated, loading } = useAuth();
-  const insets = useSafeAreaInsets();
   const router = useRouter();
 
   useEffect(() => {
@@ -45,25 +43,15 @@ function RootLayoutNav() {
 
   return (
     <ThemeProvider value={theme}>
-      <View
-        style={[
-          styles.wrapper,
-          {
-            paddingTop: insets.top + 12,
-            paddingHorizontal: 16,
-          },
-        ]}
-      >
-        <Stack screenOptions={{ headerShown: false }}>
-          {!isAuthenticated ? (
-            // Auth Stack
-            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          ) : (
-            // App Stack
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          )}
-        </Stack>
-      </View>
+      <Stack screenOptions={{ headerShown: false }}>
+        {!isAuthenticated ? (
+          // Auth Stack
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        ) : (
+          // App Stack
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        )}
+      </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
   );
@@ -80,9 +68,6 @@ export default function RootLayout() {
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    flex: 1,
-  },
   center: {
     flex: 1,
     justifyContent: 'center',
