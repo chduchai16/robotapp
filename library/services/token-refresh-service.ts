@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const TOKEN_KEY = 'id_token';
-const REFRESH_INTERVAL = 1000 * 5; // 1 phút
+const REFRESH_INTERVAL = 1000 * 60 ; // 5 phút
 
 type OnTokenExpiredCallback = () => void;
 
@@ -14,7 +14,10 @@ class TokenRefreshService {
     }
 
     start() {
-        // Chỉ check theo interval, không check ngay lập tức
+        // Check ngay lập tức khi start
+        this.checkToken();
+
+        // Rồi check theo interval
         this.refreshInterval = setInterval(async () => {
             await this.checkToken();
         }, REFRESH_INTERVAL);
@@ -33,6 +36,7 @@ class TokenRefreshService {
 
             // Nếu không có token
             if (!token) {
+                console.warn('❌ Không tìm thấy token trong AsyncStorage');
                 if (this.onTokenExpired) {
                     this.onTokenExpired();
                 }
@@ -43,16 +47,38 @@ class TokenRefreshService {
             const expiryMs = this.getTokenExpiry(token);
             const now = Date.now();
             const timeUntilExpiry = expiryMs - now;
+            const remainingSeconds = Math.round(timeUntilExpiry / 1000);
+            const remainingMinutes = Math.round(timeUntilExpiry / 1000 / 60);
+            const remainingHours = Math.round(timeUntilExpiry / 1000 / 60 / 60);
+
+            
+
+            console.log('========================================');
+            console.log('🔍 [Token Check]');
+            console.log('Timestamp:', new Date().toLocaleString());
+            console.log('Token status:', 'Hợp lệ ✅');
+
+            if (remainingHours > 0) {
+                console.log(`⏱️ Hết hạn trong: ${remainingHours}h ${remainingMinutes % 60}m`);
+            } else if (remainingMinutes > 0) {
+                console.log(`⏱️ Hết hạn trong: ${remainingMinutes} phút`);
+            } else {
+                console.log(`⏱️ Hết hạn trong: ${remainingSeconds} giây`);
+            }
+
+            console.log('Expires at:', new Date(expiryMs).toLocaleString());
+            console.log('========================================');
 
             // Nếu token hết hạn
             if (timeUntilExpiry <= 0) {
+                console.warn('❌ Token hết hạn, gọi callback logout');
                 if (this.onTokenExpired) {
                     this.onTokenExpired();
                 }
                 return;
             }
         } catch (error) {
-            console.error('Error checking token:', error);
+            console.error('❌ Lỗi check token:', error);
         }
     }
 

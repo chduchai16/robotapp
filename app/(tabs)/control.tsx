@@ -9,6 +9,20 @@ import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native';
 
+// Hàm check token có hợp lệ không
+const isTokenValid = (token: string | null): boolean => {
+    if (!token) return false;
+    try {
+        const parts = token.split('.');
+        if (parts.length !== 3) return false;
+        const payload = JSON.parse(atob(parts[1]));
+        const expiryMs = payload.exp * 1000;
+        return expiryMs > Date.now();
+    } catch {
+        return false;
+    }
+};
+
 export default function ControlScreen() {
     const { logout, idToken } = useAuth();
     const { connectedRobotId, wsService } = useRobot();
@@ -52,7 +66,31 @@ export default function ControlScreen() {
 
                 // Lắng nghe sự kiện error
                 wsService.on('error', (error: any) => {
-                    Alert.alert('Lỗi WebSocket', String(error));
+                    console.error('❌ WebSocket Error:', error);
+
+                    // Check xem token có hợp lệ không
+                    if (!isTokenValid(idToken)) {
+                        console.warn('⚠️ Token không hợp lệ hoặc hết hạn, đang logout...');
+                        Alert.alert(
+                            'Phiên hết hạn',
+                            'Token của bạn không còn hợp lệ. Vui lòng đăng nhập lại.',
+                            [
+                                {
+                                    text: 'Đồng ý',
+                                    onPress: async () => {
+                                        try {
+                                            await logout();
+                                            router.replace('/(auth)/login');
+                                        } catch (err) {
+                                            console.error('Lỗi logout:', err);
+                                        }
+                                    }
+                                }
+                            ]
+                        );
+                    } else {
+                        Alert.alert('Lỗi WebSocket', String(error));
+                    }
                 });
             } catch (error) {
                 console.error('Lỗi kết nối WebSocket:', error);
@@ -65,7 +103,7 @@ export default function ControlScreen() {
         return () => {
             wsService.clearListeners();
         };
-    }, [connectedRobotId, idToken, wsService]);
+    }, [connectedRobotId, idToken, wsService, logout, router]);
 
     const handleMicrophone = async () => {
         try {

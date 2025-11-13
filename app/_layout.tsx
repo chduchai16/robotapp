@@ -1,14 +1,13 @@
-import React, { useEffect } from 'react';
-import { StyleSheet, View, Text } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { RobotProvider } from '@/context/RobotContext';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { Stack, useRouter } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import React, { useEffect } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Expo router config (optional)
 export const unstable_settings = {
@@ -24,13 +23,15 @@ function RootLayoutNav() {
   useEffect(() => {
     if (loading) return;
 
+    // Redirect dựa trên auth state
     if (!isAuthenticated) {
       router.replace('/(auth)/login');
     } else {
       router.replace('/(tabs)');
     }
-  }, [isAuthenticated, loading]);
+  }, [isAuthenticated, loading, router]);
 
+  // Hiện loading screen khi đang check auth
   if (loading) {
     return (
       <View style={styles.center}>
@@ -39,8 +40,11 @@ function RootLayoutNav() {
     );
   }
 
+  // Hiện layout tương ứng dựa trên auth state
+  const theme = colorScheme === 'dark' ? DarkTheme : DefaultTheme;
+
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={theme}>
       <View
         style={[
           styles.wrapper,
@@ -51,8 +55,13 @@ function RootLayoutNav() {
         ]}
       >
         <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          {!isAuthenticated ? (
+            // Auth Stack
+            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          ) : (
+            // App Stack
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          )}
         </Stack>
       </View>
       <StatusBar style="auto" />
