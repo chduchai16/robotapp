@@ -2,21 +2,78 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useAuth } from '@/context/AuthContext';
+import { useRobot } from '@/context/RobotContext';
 import { VoiceService } from '@/library/services/voice-service';
 import { Audio as ExpoAudio } from 'expo-av';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 export default function ControlScreen() {
-    const { logout } = useAuth();
+    const { logout, idToken } = useAuth();
+    const { connectedRobotId, wsService } = useRobot();
     const router = useRouter();
     const voiceService = VoiceService.getInstance();
 
     const [isRecording, setIsRecording] = useState(false);
 
+    // Kết nối WebSocket khi robot được chọn
+    useEffect(() => {
+        if (!connectedRobotId || !idToken) {
+            return;
+        }
+
+        const connectWebSocket = async () => {
+            try {
+                // Check xem đã kết nối hay chưa
+                if (wsService.isConnected()) {
+                    return;
+                }
+
+                const wsUrl = `wss://robot.skteam.studio/api/ws/client/robot/${connectedRobotId}?token=${idToken}`;
+                await wsService.connect(wsUrl, connectedRobotId);
+                console.log('WebSocket kết nối thành công:', connectedRobotId);
+
+                // Lắng nghe message từ server
+                wsService.on('message', (data: any) => {
+                    console.log(data);
+                    Alert.alert('Đã nhận phản hồi từ robot');
+                });
+
+                // Lắng nghe sự kiện connected
+                wsService.on('connected', (data: any) => {
+                    console.log('WebSocket connected:', data);
+                });
+
+                // Lắng nghe sự kiện disconnected
+                wsService.on('disconnected', (data: any) => {
+                    console.log('WebSocket disconnected:', data);
+                });
+
+                // Lắng nghe sự kiện error
+                wsService.on('error', (error: any) => {
+                    Alert.alert('Lỗi WebSocket', String(error));
+                });
+            } catch (error) {
+                console.error('Lỗi kết nối WebSocket:', error);
+                Alert.alert('Lỗi kết nối', String(error));
+            }
+        };
+
+        connectWebSocket();
+
+        return () => {
+            wsService.clearListeners();
+        };
+    }, [connectedRobotId, idToken, wsService]);
+
     const handleMicrophone = async () => {
         try {
+            if (!connectedRobotId) {
+                Alert.alert('Lỗi', 'Hãy kết nối robot trước khi ra lệnh');
+                return;
+            }
+
             if (!isRecording) {
                 // Request microphone permission
                 const { status } = await ExpoAudio.requestPermissionsAsync();
@@ -32,7 +89,18 @@ export default function ControlScreen() {
                 const text = await voiceService.stopRecording();
 
                 if (text.trim().length > 0) {
-                    Alert.alert("Kết quả giọng nói", text);
+                    // Gửi text từ microphone qua WebSocket
+                    try {
+                        if (!wsService.isConnected()) {
+                            Alert.alert('Lỗi', 'WebSocket chưa kết nối');
+                            return;
+                        }
+                        wsService.sendCommand('voice', { text });
+                        Alert.alert('✅ Gửi lệnh', `Lệnh voice: ${text}`);
+                    } catch (error) {
+                        console.error("❌ Lỗi gửi lệnh voice:", error);
+                        Alert.alert('❌ Lỗi', String(error));
+                    }
                 } else {
                     Alert.alert("Không nhận được giọng nói", "Hãy thử lại.");
                 }
@@ -45,7 +113,23 @@ export default function ControlScreen() {
 
 
     const handleCommand = (command: string) => {
-        Alert.alert('Lệnh', `Lệnh: ${command}`);
+        try {
+            if (!connectedRobotId) {
+                Alert.alert('Lỗi', 'Hãy kết nối robot trước khi ra lệnh');
+                return;
+            }
+
+            if (!wsService.isConnected()) {
+                Alert.alert('Lỗi', 'WebSocket chưa kết nối');
+                return;
+            }
+
+            // Gửi lệnh qua WebSocket
+            wsService.sendCommand('command', { text: command });
+        } catch (error) {
+            console.error("❌ Lỗi gửi lệnh quick command:", error);
+            Alert.alert("❌ Lỗi gửi lệnh", String(error));
+        }
     };
 
     const handleLogout = async () => {
@@ -124,18 +208,26 @@ export default function ControlScreen() {
 
                     <TouchableOpacity
                         style={styles.commandButton}
-                        onPress={() => handleCommand('Dừng lại')}
+                        onPress={() => handleCommand('Xoay phải 90°')}
                     >
-                        <IconSymbol size={32} name="stop.circle.fill" color="#FF3B30" />
-                        <ThemedText style={styles.commandText}>Dừng</ThemedText>
+                        <IconSymbol size={32} name="rotate.right.fill" color="#34C759" />
+                        <ThemedText style={styles.commandText}>Xoay phải 90°</ThemedText>
                     </TouchableOpacity>
 
                     <TouchableOpacity
                         style={styles.commandButton}
-                        onPress={() => handleCommand('Xoay quanh')}
+                        onPress={() => handleCommand('Xoay trái 90°')}
                     >
-                        <IconSymbol size={32} name="rotate.right.fill" color="#34C759" />
-                        <ThemedText style={styles.commandText}>Xoay</ThemedText>
+                        <IconSymbol size={32} name="rotate.left.fill" color="#34C759" />
+                        <ThemedText style={styles.commandText}>Xoay trái 90°</ThemedText>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.commandButton}
+                        onPress={() => handleCommand('Dừng lại')}
+                    >
+                        <IconSymbol size={32} name="stop.circle.fill" color="#FF3B30" />
+                        <ThemedText style={styles.commandText}>Dừng</ThemedText>
                     </TouchableOpacity>
                 </View>
             </View>
