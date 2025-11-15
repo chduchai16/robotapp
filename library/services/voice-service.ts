@@ -1,6 +1,7 @@
 // src/services/VoiceService.ts
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Audio } from "expo-av";
+import Constants from 'expo-constants';
 import * as FileSystem from 'expo-file-system/legacy';
 
 export class VoiceService {
@@ -9,7 +10,7 @@ export class VoiceService {
     private geminiClient: GoogleGenerativeAI | null = null;
 
     private constructor() {
-        const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
+        const apiKey = Constants.expoConfig?.extra?.geminiApiKey;
         if (apiKey) {
             this.geminiClient = new GoogleGenerativeAI(apiKey);
         }

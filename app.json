@@ -62,7 +62,8 @@
       "router": {},
       "eas": {
         "projectId": "38320a47-f84b-4fb2-8e5c-fb50607f844c"
-      }
+      },
+      "geminiApiKey": "AIzaSyAYa4Mo9m4ZQzrxgH9VhCEgWWsaIGob3q4"
     }
   }
 }
