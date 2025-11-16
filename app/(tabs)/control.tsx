@@ -214,7 +214,7 @@ export default function ControlScreen() {
                 <View style={styles.commandsGrid}>
                     <TouchableOpacity
                         style={styles.commandButton}
-                        onPress={() => handleCommand('Tiến lên')}
+                        onPress={() => handleCommand('Tiến lên 1 mét')}
                     >
                         <FontAwesome5 size={32} name="arrow-up" color="#007AFF" />
                         <ThemedText style={styles.commandText}>Tiến</ThemedText>
@@ -222,26 +222,10 @@ export default function ControlScreen() {
 
                     <TouchableOpacity
                         style={styles.commandButton}
-                        onPress={() => handleCommand('Lùi lại')}
+                        onPress={() => handleCommand('Lùi lại 1 mét')}
                     >
                         <FontAwesome5 size={32} name="arrow-down" color="#007AFF" />
                         <ThemedText style={styles.commandText}>Lùi</ThemedText>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={styles.commandButton}
-                        onPress={() => handleCommand('Quay trái')}
-                    >
-                        <FontAwesome5 size={32} name="arrow-left" color="#007AFF" />
-                        <ThemedText style={styles.commandText}>Trái</ThemedText>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={styles.commandButton}
-                        onPress={() => handleCommand('Quay phải')}
-                    >
-                        <FontAwesome5 size={32} name="arrow-right" color="#007AFF" />
-                        <ThemedText style={styles.commandText}>Phải</ThemedText>
                     </TouchableOpacity>
 
                     <TouchableOpacity
