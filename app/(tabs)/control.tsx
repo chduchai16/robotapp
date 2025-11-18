@@ -1,13 +1,14 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useAuth } from '@/context/AuthContext';
+import { useCommandHistory } from '@/context/CommandHistoryContext';
 import { useRobot } from '@/context/RobotContext';
 import { VoiceService } from '@/library/services/voice-service';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { Audio as ExpoAudio } from 'expo-av';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 // Hàm check token có hợp lệ không
 const isTokenValid = (token: string | null): boolean => {
@@ -26,6 +27,7 @@ const isTokenValid = (token: string | null): boolean => {
 export default function ControlScreen() {
     const { logout, idToken } = useAuth();
     const { connectedRobotId, wsService } = useRobot();
+    const { history, addCommand } = useCommandHistory();
     const router = useRouter();
     const voiceService = VoiceService.getInstance();
 
@@ -134,7 +136,11 @@ export default function ControlScreen() {
                             return;
                         }
                         wsService.sendCommand('voice', { text });
-                        Alert.alert('✅ Gửi lệnh', `Lệnh voice: ${text}`);
+
+                        // Thêm vào lịch sử
+                        addCommand(text, connectedRobotId);
+
+                        Alert.alert('Gửi lệnh', `Lệnh voice: ${text}`);
                     } catch (error) {
                         console.error("❌ Lỗi gửi lệnh voice:", error);
                         Alert.alert('❌ Lỗi', String(error));
@@ -164,6 +170,9 @@ export default function ControlScreen() {
 
             // Gửi lệnh qua WebSocket
             wsService.sendCommand('command', { text: command });
+
+            // Thêm vào lịch sử
+            addCommand(command, connectedRobotId);
         } catch (error) {
             console.error("❌ Lỗi gửi lệnh quick command:", error);
             Alert.alert("❌ Lỗi gửi lệnh", String(error));
@@ -198,61 +207,78 @@ export default function ControlScreen() {
                 <ThemedText style={styles.title}>Điều khiển thiết bị đang kết nối</ThemedText>
             </View>
 
-            <View style={styles.content}>
-                {/* Microphone Button */}
-                <TouchableOpacity style={styles.microphoneButton} onPress={handleMicrophone}>
-                    <FontAwesome5
-                        size={60}
-                        name={isRecording ? "microphone-slash" : "microphone"}
-                        color="#fff"
-                    />
-                </TouchableOpacity>
-
-
-                {/* Commands Grid */}
-                <ThemedText style={styles.sectionTitle}>Các lệnh nhanh</ThemedText>
-                <View style={styles.commandsGrid}>
-                    <TouchableOpacity
-                        style={styles.commandButton}
-                        onPress={() => handleCommand('Tiến lên 1 mét')}
-                    >
-                        <FontAwesome5 size={32} name="arrow-up" color="#007AFF" />
-                        <ThemedText style={styles.commandText}>Tiến</ThemedText>
+            <ScrollView style={styles.scrollContent}>
+                <View style={styles.content}>
+                    {/* Microphone Button */}
+                    <TouchableOpacity style={styles.microphoneButton} onPress={handleMicrophone}>
+                        <FontAwesome5
+                            size={60}
+                            name={isRecording ? "microphone-slash" : "microphone"}
+                            color="#fff"
+                        />
                     </TouchableOpacity>
 
-                    <TouchableOpacity
-                        style={styles.commandButton}
-                        onPress={() => handleCommand('Lùi lại 1 mét')}
-                    >
-                        <FontAwesome5 size={32} name="arrow-down" color="#007AFF" />
-                        <ThemedText style={styles.commandText}>Lùi</ThemedText>
-                    </TouchableOpacity>
+                    {/* Commands Grid */}
+                    <ThemedText style={styles.sectionTitle}>Các lệnh nhanh</ThemedText>
+                    <View style={styles.commandsGrid}>
+                        <TouchableOpacity
+                            style={styles.commandButton}
+                            onPress={() => handleCommand('Tiến lên 1 mét')}
+                        >
+                            <FontAwesome5 size={32} name="arrow-up" color="#007AFF" />
+                            <ThemedText style={styles.commandText}>Tiến</ThemedText>
+                        </TouchableOpacity>
 
-                    <TouchableOpacity
-                        style={styles.commandButton}
-                        onPress={() => handleCommand('Xoay phải 90°')}
-                    >
-                        <FontAwesome5 size={32} name="redo" color="#34C759" />
-                        <ThemedText style={styles.commandText}>Xoay phải 90°</ThemedText>
-                    </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.commandButton}
+                            onPress={() => handleCommand('Lùi lại 1 mét')}
+                        >
+                            <FontAwesome5 size={32} name="arrow-down" color="#007AFF" />
+                            <ThemedText style={styles.commandText}>Lùi</ThemedText>
+                        </TouchableOpacity>
 
-                    <TouchableOpacity
-                        style={styles.commandButton}
-                        onPress={() => handleCommand('Xoay trái 90°')}
-                    >
-                        <FontAwesome5 size={32} name="undo" color="#34C759" />
-                        <ThemedText style={styles.commandText}>Xoay trái 90°</ThemedText>
-                    </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.commandButton}
+                            onPress={() => handleCommand('rẽ phải')}
+                        >
+                            <FontAwesome5 size={32} name="redo" color="#34C759" />
+                            <ThemedText style={styles.commandText}>Rẽ phải</ThemedText>
+                        </TouchableOpacity>
 
-                    <TouchableOpacity
-                        style={styles.commandButton}
-                        onPress={() => handleCommand('Dừng lại')}
-                    >
-                        <FontAwesome5 size={32} name="stop-circle" color="#FF3B30" />
-                        <ThemedText style={styles.commandText}>Dừng</ThemedText>
-                    </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.commandButton}
+                            onPress={() => handleCommand('Nâng')}
+                        >
+                            <FontAwesome5 size={32} name="arrow-up" color="#e2df1aff" />
+                            <ThemedText style={styles.commandText}>Nâng</ThemedText>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.commandButton}
+                            onPress={() => handleCommand('Hạ')}
+                        >
+                            <FontAwesome5 size={32} name="arrow-down" color="#b9b73eff" />
+                            <ThemedText style={styles.commandText}>Hạ</ThemedText>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={styles.commandButton}
+                            onPress={() => handleCommand('Rẽ trái')}
+                        >
+                            <FontAwesome5 size={32} name="undo" color="#34C759" />
+                            <ThemedText style={styles.commandText}>Rẽ trái</ThemedText>
+                        </TouchableOpacity>
+
+                        {/* lịch sử lệnh gửi */}
+                    </View>
+
+                    {history.length > 0 && (
+                        <View style={styles.historyItem}>
+                            <ThemedText style={styles.historyCommand}>{history[0].robotId}: {history[0].text}</ThemedText>
+                            <ThemedText style={styles.historyTime}>{history[0].timestamp}</ThemedText>
+                        </View>
+                    )}
                 </View>
-            </View>
+            </ScrollView>
 
             <View style={styles.logoutSection}>
                 <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
@@ -266,6 +292,7 @@ export default function ControlScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        paddingTop: 50,
     },
     header: {
         paddingHorizontal: 20,
@@ -276,6 +303,9 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 20,
         fontWeight: 'bold',
+    },
+    scrollContent: {
+        flex: 1,
     },
     content: {
         flex: 1,
@@ -320,7 +350,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: '#f9f9f9',
-        padding: 8,
     },
     commandText: {
         fontSize: 12,
@@ -346,5 +375,39 @@ const styles = StyleSheet.create({
         paddingBottom: 24,
         borderTopWidth: 1,
         borderTopColor: '#ddd',
+    },
+    historySection: {
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        backgroundColor: '#f5f5f5',
+        marginTop: 16,
+        borderRadius: 8,
+        marginHorizontal: 16,
+    },
+    historyTitle: {
+        fontSize: 14,
+        fontWeight: '600',
+        marginBottom: 8,
+    },
+    historyList: {
+        maxHeight: 150,
+    },
+    historyItem: {
+        backgroundColor: '#fff',
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 6,
+        marginBottom: 6,
+        borderLeftWidth: 3,
+        borderLeftColor: '#007AFF',
+    },
+    historyCommand: {
+        fontSize: 13,
+        fontWeight: '500',
+        marginBottom: 3,
+    },
+    historyTime: {
+        fontSize: 11,
+        opacity: 0.6,
     },
 });

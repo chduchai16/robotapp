@@ -158,6 +158,7 @@ export default function RobotsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingTop : 50,
   },
   header: {
     paddingHorizontal: 20,

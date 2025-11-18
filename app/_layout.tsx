@@ -1,4 +1,5 @@
 import { AuthProvider, useAuth } from '@/context/AuthContext';
+import { CommandHistoryProvider } from '@/context/CommandHistoryContext';
 import { RobotProvider } from '@/context/RobotContext';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
@@ -42,7 +43,7 @@ function RootLayoutNav() {
   const theme = colorScheme === 'dark' ? DarkTheme : DefaultTheme;
 
   return (
-    <ThemeProvider value={theme}>
+    <ThemeProvider value={theme} >
       <Stack screenOptions={{ headerShown: false }}>
         {!isAuthenticated ? (
           // Auth Stack
@@ -61,7 +62,9 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <RobotProvider>
-        <RootLayoutNav />
+        <CommandHistoryProvider>
+          <RootLayoutNav />
+        </CommandHistoryProvider>
       </RobotProvider>
     </AuthProvider>
   );
