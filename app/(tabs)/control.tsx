@@ -32,6 +32,8 @@ export default function ControlScreen() {
     const voiceService = VoiceService.getInstance();
 
     const [isRecording, setIsRecording] = useState(false);
+    // liftState: 0 = "Nâng" (sends 180°), 1 = "Hạ xuống"
+    const [liftState, setLiftState] = useState<number>(0);
 
     // Kết nối WebSocket khi robot được chọn
     useEffect(() => {
@@ -139,8 +141,6 @@ export default function ControlScreen() {
 
                         // Thêm vào lịch sử
                         addCommand(text, connectedRobotId);
-
-                        Alert.alert('Gửi lệnh', `Lệnh voice: ${text}`);
                     } catch (error) {
                         console.error("❌ Lỗi gửi lệnh voice:", error);
                         Alert.alert('❌ Lỗi', String(error));
@@ -176,6 +176,23 @@ export default function ControlScreen() {
         } catch (error) {
             console.error("❌ Lỗi gửi lệnh quick command:", error);
             Alert.alert("❌ Lỗi gửi lệnh", String(error));
+        }
+    };
+
+    // Handler for the lift button which cycles between Nâng (180°) and Hạ xuống
+    const handleLiftPress = () => {
+        try {
+            // map current state to command text
+            const commands = ['Nâng lên', 'Hạ xuống'];
+            const cmd = commands[liftState] ?? commands[0];
+
+            // send using existing helper
+            handleCommand(cmd);
+
+            // advance state (cycle 0 -> 1 -> 0)
+            setLiftState((s) => (s === 0 ? 1 : 0));
+        } catch (error) {
+            console.error('Lỗi handleLiftPress:', error);
         }
     };
 
@@ -245,20 +262,6 @@ export default function ControlScreen() {
                             <ThemedText style={styles.commandText}>Rẽ phải</ThemedText>
                         </TouchableOpacity>
 
-                        <TouchableOpacity
-                            style={styles.commandButton}
-                            onPress={() => handleCommand('Nâng')}
-                        >
-                            <FontAwesome5 size={32} name="arrow-up" color="#e2df1aff" />
-                            <ThemedText style={styles.commandText}>Nâng</ThemedText>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.commandButton}
-                            onPress={() => handleCommand('Hạ')}
-                        >
-                            <FontAwesome5 size={32} name="arrow-down" color="#b9b73eff" />
-                            <ThemedText style={styles.commandText}>Hạ</ThemedText>
-                        </TouchableOpacity>
 
                         <TouchableOpacity
                             style={styles.commandButton}
@@ -266,6 +269,22 @@ export default function ControlScreen() {
                         >
                             <FontAwesome5 size={32} name="undo" color="#34C759" />
                             <ThemedText style={styles.commandText}>Rẽ trái</ThemedText>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={styles.commandButton}
+                            onPress={handleLiftPress}
+                        >
+                            <FontAwesome5 size={32} name={liftState === 0 ? 'arrow-up' : 'arrow-down'} color={liftState === 0 ? '#e2df1aff' : '#34C759'} />
+                            <ThemedText style={styles.commandText}>{liftState === 0 ? 'Nâng' : 'Hạ xuống'}</ThemedText>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={styles.commandButton}
+                            onPress={() => handleCommand('Dừng lại')}
+                        >
+                            <FontAwesome5 size={32} name="stop" color="red" />
+                            <ThemedText style={styles.commandText}>Dừng lại</ThemedText>
                         </TouchableOpacity>
 
                         {/* lịch sử lệnh gửi */}

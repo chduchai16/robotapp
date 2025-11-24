@@ -37,6 +37,11 @@ export default function RobotsScreen() {
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
+      // If a robot is currently connected, disconnect before reloading list
+      if (connectedRobotId && wsService && wsService.isConnected && wsService.isConnected()) {
+        disconnectRobot();
+      }
+
       if (!idToken) {
         setRefreshing(false);
         return;
@@ -52,7 +57,7 @@ export default function RobotsScreen() {
     } finally {
       setRefreshing(false);
     }
-  }, [idToken, robotService]);
+  }, [idToken, robotService, connectedRobotId, disconnectRobot, wsService]);
 
   const robotEntries = Object.entries(robots);
 
@@ -88,7 +93,6 @@ export default function RobotsScreen() {
                   await wsService.connect(wsUrl, robotId);
                   setConnectedRobotId(robotId);
                   setConnectingRobotId(null);
-                  Alert.alert('Thành công', `Đã kết nối đến ${displayName}`);
                 } catch (error: any) {
                   setConnectingRobotId(null);
                   const errorMsg = error?.message || 'Lỗi không xác định';
@@ -158,7 +162,7 @@ export default function RobotsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop : 50,
+    paddingTop: 50,
   },
   header: {
     paddingHorizontal: 20,
