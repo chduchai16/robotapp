@@ -182,12 +182,14 @@ export default function ControlScreen() {
     // Handler for the lift button which cycles between Nâng (180°) and Hạ xuống
     const handleLiftPress = () => {
         try {
-            // map current state to command text
-            const commands = ['Nâng lên', 'Hạ xuống'];
-            const cmd = commands[liftState] ?? commands[0];
-
-            // send using existing helper
-            handleCommand(cmd);
+            // map current state to structured command
+            if (liftState === 0) {
+                // send Nâng 180 độ
+                handleCommand(JSON.stringify({ actions: [{ intent: 'nang', params: { angle: 180, unit: 'deg' } }] }));
+            } else {
+                // send Hạ xuống
+                handleCommand(JSON.stringify({ actions: [{ intent: 'ha' }] }));
+            }
 
             // advance state (cycle 0 -> 1 -> 0)
             setLiftState((s) => (s === 0 ? 1 : 0));
@@ -240,7 +242,7 @@ export default function ControlScreen() {
                     <View style={styles.commandsGrid}>
                         <TouchableOpacity
                             style={styles.commandButton}
-                            onPress={() => handleCommand('Tiến lên 1 mét')}
+                            onPress={() => handleCommand(JSON.stringify({ actions: [{ intent: 'tien', params: { distance: 1, unit: 'm' } }] }))}
                         >
                             <FontAwesome5 size={32} name="arrow-up" color="#007AFF" />
                             <ThemedText style={styles.commandText}>Tiến</ThemedText>
@@ -248,7 +250,7 @@ export default function ControlScreen() {
 
                         <TouchableOpacity
                             style={styles.commandButton}
-                            onPress={() => handleCommand('Lùi lại 1 mét')}
+                            onPress={() => handleCommand(JSON.stringify({ actions: [{ intent: 'lui', params: { distance: 1, unit: 'm' } }] }))}
                         >
                             <FontAwesome5 size={32} name="arrow-down" color="#007AFF" />
                             <ThemedText style={styles.commandText}>Lùi</ThemedText>
@@ -256,7 +258,7 @@ export default function ControlScreen() {
 
                         <TouchableOpacity
                             style={styles.commandButton}
-                            onPress={() => handleCommand('rẽ phải')}
+                            onPress={() => handleCommand(JSON.stringify({ actions: [{ intent: 're_phai' }] }))}
                         >
                             <FontAwesome5 size={32} name="redo" color="#34C759" />
                             <ThemedText style={styles.commandText}>Rẽ phải</ThemedText>
@@ -265,7 +267,7 @@ export default function ControlScreen() {
 
                         <TouchableOpacity
                             style={styles.commandButton}
-                            onPress={() => handleCommand('Rẽ trái')}
+                            onPress={() => handleCommand(JSON.stringify({ actions: [{ intent: 're_trai' }] }))}
                         >
                             <FontAwesome5 size={32} name="undo" color="#34C759" />
                             <ThemedText style={styles.commandText}>Rẽ trái</ThemedText>
@@ -281,7 +283,7 @@ export default function ControlScreen() {
 
                         <TouchableOpacity
                             style={styles.commandButton}
-                            onPress={() => handleCommand('Dừng lại')}
+                            onPress={() => handleCommand(JSON.stringify({ actions: [{ intent: 'dung_lai' }] }))}
                         >
                             <FontAwesome5 size={32} name="stop" color="red" />
                             <ThemedText style={styles.commandText}>Dừng lại</ThemedText>
