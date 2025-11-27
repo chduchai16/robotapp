@@ -137,7 +137,7 @@ export default function ControlScreen() {
                             Alert.alert('Lỗi', 'WebSocket chưa kết nối');
                             return;
                         }
-                        wsService.sendCommand('voice', { text });
+                        wsService.sendCommand({ text });
 
                         // Thêm vào lịch sử
                         addCommand(text, connectedRobotId);
@@ -169,7 +169,7 @@ export default function ControlScreen() {
             }
 
             // Gửi lệnh qua WebSocket
-            wsService.sendCommand('command', { text: command });
+            wsService.sendCommand(command);
 
             // Thêm vào lịch sử
             addCommand(command, connectedRobotId);
@@ -184,11 +184,11 @@ export default function ControlScreen() {
         try {
             // map current state to structured command
             if (liftState === 0) {
-                // send Nâng 180 độ
-                handleCommand(JSON.stringify({ actions: [{ intent: 'nang', params: { angle: 180, unit: 'deg' } }] }));
+                // send Nâng 180 độ (as array)
+                handleCommand(JSON.stringify([{ intent: 'nang', params: { angle: 180, unit: 'deg' } }]));
             } else {
-                // send Hạ xuống
-                handleCommand(JSON.stringify({ actions: [{ intent: 'ha' }] }));
+                // send Hạ xuống (as array)
+                handleCommand(JSON.stringify([{ intent: 'ha' }]));
             }
 
             // advance state (cycle 0 -> 1 -> 0)
@@ -242,7 +242,7 @@ export default function ControlScreen() {
                     <View style={styles.commandsGrid}>
                         <TouchableOpacity
                             style={styles.commandButton}
-                            onPress={() => handleCommand(JSON.stringify({ actions: [{ intent: 'tien', params: { distance: 1, unit: 'm' } }] }))}
+                            onPress={() => handleCommand(JSON.stringify([{ intent: 'tien', params: { distance: 1, unit: 'm' } }]))}
                         >
                             <FontAwesome5 size={32} name="arrow-up" color="#007AFF" />
                             <ThemedText style={styles.commandText}>Tiến</ThemedText>
@@ -250,7 +250,7 @@ export default function ControlScreen() {
 
                         <TouchableOpacity
                             style={styles.commandButton}
-                            onPress={() => handleCommand(JSON.stringify({ actions: [{ intent: 'lui', params: { distance: 1, unit: 'm' } }] }))}
+                            onPress={() => handleCommand(JSON.stringify([{ intent: 'lui', params: { distance: 1, unit: 'm' } }]))}
                         >
                             <FontAwesome5 size={32} name="arrow-down" color="#007AFF" />
                             <ThemedText style={styles.commandText}>Lùi</ThemedText>
@@ -258,7 +258,7 @@ export default function ControlScreen() {
 
                         <TouchableOpacity
                             style={styles.commandButton}
-                            onPress={() => handleCommand(JSON.stringify({ actions: [{ intent: 're_phai' }] }))}
+                            onPress={() => handleCommand(JSON.stringify([{ intent: 're_phai' }]))}
                         >
                             <FontAwesome5 size={32} name="redo" color="#34C759" />
                             <ThemedText style={styles.commandText}>Rẽ phải</ThemedText>
@@ -267,7 +267,7 @@ export default function ControlScreen() {
 
                         <TouchableOpacity
                             style={styles.commandButton}
-                            onPress={() => handleCommand(JSON.stringify({ actions: [{ intent: 're_trai' }] }))}
+                            onPress={() => handleCommand(JSON.stringify([{ intent: 're_trai' }]))}
                         >
                             <FontAwesome5 size={32} name="undo" color="#34C759" />
                             <ThemedText style={styles.commandText}>Rẽ trái</ThemedText>
@@ -283,7 +283,7 @@ export default function ControlScreen() {
 
                         <TouchableOpacity
                             style={styles.commandButton}
-                            onPress={() => handleCommand(JSON.stringify({ actions: [{ intent: 'dung_lai' }] }))}
+                            onPress={() => handleCommand(JSON.stringify([{ intent: 'dung_lai' }]))}
                         >
                             <FontAwesome5 size={32} name="stop" color="red" />
                             <ThemedText style={styles.commandText}>Dừng lại</ThemedText>

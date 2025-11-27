@@ -64,7 +64,7 @@ export class WebSocketService {
     }
 
     // Gửi lệnh qua WebSocket
-    sendCommand(command: string, params?: any) {
+    sendCommand( params?: any) {
         if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
             const error = 'WebSocket không sẵn sàng';
             console.error(error);
@@ -72,7 +72,6 @@ export class WebSocketService {
         }
 
         const message = {
-            command,
             params,
             timestamp: Date.now(),
         };
