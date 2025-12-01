@@ -71,12 +71,7 @@ export class WebSocketService {
             throw new Error(error);
         }
 
-        const message = {
-            params,
-            timestamp: Date.now(),
-        };
-
-        this.ws.send(JSON.stringify(message));
+        this.ws.send(JSON.stringify(params));
     }
 
     // Đóng kết nối WebSocket

@@ -137,7 +137,7 @@ export default function ControlScreen() {
                             Alert.alert('Lỗi', 'WebSocket chưa kết nối');
                             return;
                         }
-                        wsService.sendCommand({ text });
+                        wsService.sendCommand(text);
 
                         // Thêm vào lịch sử
                         addCommand(text, connectedRobotId);
@@ -156,7 +156,7 @@ export default function ControlScreen() {
     };
 
 
-    const handleCommand = (command: string) => {
+    const handleCommand = (command: any) => {
         try {
             if (!connectedRobotId) {
                 Alert.alert('Lỗi', 'Hãy kết nối robot trước khi ra lệnh');
@@ -184,11 +184,10 @@ export default function ControlScreen() {
         try {
             // map current state to structured command
             if (liftState === 0) {
-                // send Nâng 180 độ (as array)
-                handleCommand(JSON.stringify([{ intent: 'nang', params: { angle: 180, unit: 'deg' } }]));
+                handleCommand({ intent: 'nang' });
             } else {
                 // send Hạ xuống (as array)
-                handleCommand(JSON.stringify([{ intent: 'ha' }]));
+                handleCommand({ intent: 'ha' });
             }
 
             // advance state (cycle 0 -> 1 -> 0)
@@ -242,7 +241,7 @@ export default function ControlScreen() {
                     <View style={styles.commandsGrid}>
                         <TouchableOpacity
                             style={styles.commandButton}
-                            onPress={() => handleCommand(JSON.stringify([{ intent: 'tien', params: { distance: 1, unit: 'm' } }]))}
+                            onPress={() => handleCommand({ intent: 'tien', params: { distance: 1, unit: 'm' } })}
                         >
                             <FontAwesome5 size={32} name="arrow-up" color="#007AFF" />
                             <ThemedText style={styles.commandText}>Tiến</ThemedText>
@@ -250,7 +249,7 @@ export default function ControlScreen() {
 
                         <TouchableOpacity
                             style={styles.commandButton}
-                            onPress={() => handleCommand(JSON.stringify([{ intent: 'lui', params: { distance: 1, unit: 'm' } }]))}
+                            onPress={() => handleCommand({ intent: 'lui', params: { distance: 1, unit: 'm' } })}
                         >
                             <FontAwesome5 size={32} name="arrow-down" color="#007AFF" />
                             <ThemedText style={styles.commandText}>Lùi</ThemedText>
@@ -258,7 +257,7 @@ export default function ControlScreen() {
 
                         <TouchableOpacity
                             style={styles.commandButton}
-                            onPress={() => handleCommand(JSON.stringify([{ intent: 're_phai' }]))}
+                            onPress={() => handleCommand({ intent: 're_phai' })}
                         >
                             <FontAwesome5 size={32} name="redo" color="#34C759" />
                             <ThemedText style={styles.commandText}>Rẽ phải</ThemedText>
@@ -267,7 +266,7 @@ export default function ControlScreen() {
 
                         <TouchableOpacity
                             style={styles.commandButton}
-                            onPress={() => handleCommand(JSON.stringify([{ intent: 're_trai' }]))}
+                            onPress={() => handleCommand({ intent: 're_trai' })}
                         >
                             <FontAwesome5 size={32} name="undo" color="#34C759" />
                             <ThemedText style={styles.commandText}>Rẽ trái</ThemedText>
@@ -283,7 +282,7 @@ export default function ControlScreen() {
 
                         <TouchableOpacity
                             style={styles.commandButton}
-                            onPress={() => handleCommand(JSON.stringify([{ intent: 'dung_lai' }]))}
+                            onPress={() => handleCommand({ intent: 'dung_lai' })}
                         >
                             <FontAwesome5 size={32} name="stop" color="red" />
                             <ThemedText style={styles.commandText}>Dừng lại</ThemedText>
@@ -294,7 +293,9 @@ export default function ControlScreen() {
 
                     {history.length > 0 && (
                         <View style={styles.historyItem}>
-                            <ThemedText style={styles.historyCommand}>{history[0].robotId}: {history[0].text}</ThemedText>
+                            <ThemedText style={styles.historyCommand}>
+                                {history[0].robotId}: {typeof history[0].text === 'string' ? history[0].text : JSON.stringify(history[0].text)}
+                            </ThemedText>
                             <ThemedText style={styles.historyTime}>{history[0].timestamp}</ThemedText>
                         </View>
                     )}
