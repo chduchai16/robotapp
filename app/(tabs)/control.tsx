@@ -137,7 +137,7 @@ export default function ControlScreen() {
                             Alert.alert('Lỗi', 'WebSocket chưa kết nối');
                             return;
                         }
-                        wsService.sendCommand(text);
+                        wsService.sendCommand(text , 'text');
 
                         // Thêm vào lịch sử
                         addCommand(text, connectedRobotId);
@@ -169,7 +169,7 @@ export default function ControlScreen() {
             }
 
             // Gửi lệnh qua WebSocket
-            wsService.sendCommand(command);
+            wsService.sendCommand(command , 'command');
 
             // Thêm vào lịch sử
             addCommand(command, connectedRobotId);
@@ -184,10 +184,10 @@ export default function ControlScreen() {
         try {
             // map current state to structured command
             if (liftState === 0) {
-                handleCommand({ intent: 'nang' });
+                handleCommand({ intent: 'nang', params: {} });
             } else {
                 // send Hạ xuống (as array)
-                handleCommand({ intent: 'ha' });
+                handleCommand({ intent: 'ha', params: {} });
             }
 
             // advance state (cycle 0 -> 1 -> 0)
@@ -257,7 +257,7 @@ export default function ControlScreen() {
 
                         <TouchableOpacity
                             style={styles.commandButton}
-                            onPress={() => handleCommand({ intent: 're_phai' })}
+                            onPress={() => handleCommand({ intent: 're_phai', params :{} })}
                         >
                             <FontAwesome5 size={32} name="redo" color="#34C759" />
                             <ThemedText style={styles.commandText}>Rẽ phải</ThemedText>
@@ -266,7 +266,7 @@ export default function ControlScreen() {
 
                         <TouchableOpacity
                             style={styles.commandButton}
-                            onPress={() => handleCommand({ intent: 're_trai' })}
+                            onPress={() => handleCommand({ intent: 're_trai' ,params:{}})}
                         >
                             <FontAwesome5 size={32} name="undo" color="#34C759" />
                             <ThemedText style={styles.commandText}>Rẽ trái</ThemedText>
@@ -282,7 +282,7 @@ export default function ControlScreen() {
 
                         <TouchableOpacity
                             style={styles.commandButton}
-                            onPress={() => handleCommand({ intent: 'dung_lai' })}
+                            onPress={() => handleCommand({ intent: 'dung_lai' , params:{}})}
                         >
                             <FontAwesome5 size={32} name="stop" color="red" />
                             <ThemedText style={styles.commandText}>Dừng lại</ThemedText>

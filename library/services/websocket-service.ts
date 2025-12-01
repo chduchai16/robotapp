@@ -64,14 +64,18 @@ export class WebSocketService {
     }
 
     // Gửi lệnh qua WebSocket
-    sendCommand( params?: any) {
+    sendCommand( params?: any , type : string = 'command') {
         if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
             const error = 'WebSocket không sẵn sàng';
             console.error(error);
             throw new Error(error);
         }
-
-        this.ws.send(JSON.stringify(params));
+        if(type === 'command') {
+            this.ws.send(JSON.stringify(params));
+        }
+        else {
+            this.ws.send(params);
+        }
     }
 
     // Đóng kết nối WebSocket
