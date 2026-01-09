@@ -24,7 +24,6 @@ export class VoiceService {
     }
 
     async startRecording() {
-        // Cleanup Recording cũ nếu có
         if (this.recording) {
             try {
                 await this.recording.stopAndUnloadAsync();
@@ -46,11 +45,9 @@ export class VoiceService {
 
     async stopRecording(): Promise<string> {
         if (!this.recording) return "";
-
         await this.recording.stopAndUnloadAsync();
         const uri = this.recording.getURI();
         this.recording = null;
-
         if (!uri) {
             return "Không có audio file";
         }
@@ -59,15 +56,12 @@ export class VoiceService {
             if (!this.geminiClient) {
                 throw new Error('Gemini API Key không được set. Thêm EXPO_PUBLIC_GEMINI_API_KEY vào .env');
             }
-
             // Convert file thành base64
             const base64Audio = await FileSystem.readAsStringAsync(uri, {
                 encoding: "base64",
             });
-
             // Gọi Gemini API để transcribe
             const model = this.geminiClient.getGenerativeModel({ model: "gemini-2.0-flash" });
-
             const result = await model.generateContent([
                 {
                     inlineData: {
@@ -79,7 +73,6 @@ export class VoiceService {
                     text: "Hãy chuyển đổi nội dung audio này thành văn bản. Chỉ trả về văn bản, không có ghi chú gì thêm.",
                 },
             ]);
-
             const transcribedText = result.response.text();
             return transcribedText;
 

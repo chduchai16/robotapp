@@ -13,7 +13,6 @@ export class WebSocketService {
                     this.emit('connected', { robotId, timestamp: Date.now() });
                     resolve({ status: 'connected', robotId });
                 };
-
                 this.ws.onmessage = (event) => {
                     try {
                         const data = JSON.parse(event.data);
@@ -22,7 +21,6 @@ export class WebSocketService {
                         console.error('Lỗi parse WebSocket message:', e);
                     }
                 };
-
                 this.ws.onerror = (error) => {
                     console.error('Lỗi WebSocket:', error);
                     this.emit('error', error);
@@ -31,7 +29,6 @@ export class WebSocketService {
                         reject(error);
                     }
                 };
-
                 this.ws.onclose = () => {
                     this.emit('disconnected', { robotId, timestamp: Date.now() });
                     this.ws = null;
@@ -40,22 +37,6 @@ export class WebSocketService {
                         reject(new Error('WebSocket đã đóng trước khi kết nối thành công'));
                     }
                 };
-
-                // Timeout sau 10 giây nếu không kết nối được
-                const timeoutId = setTimeout(() => {
-                    if (!resolved && this.ws) {
-                        resolved = true;
-                        this.ws.close();
-                        reject(new Error('Timeout kết nối WebSocket'));
-                    }
-                }, 10000);
-
-                // Xóa timeout nếu kết nối thành công
-                const originalResolve = resolve;
-                resolve = ((value: any) => {
-                    clearTimeout(timeoutId);
-                    originalResolve(value);
-                }) as typeof resolve;
             } catch (error) {
                 console.error('Lỗi kết nối WebSocket:', error);
                 reject(error);

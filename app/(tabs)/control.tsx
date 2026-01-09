@@ -266,7 +266,15 @@ export default function ControlScreen() {
 
                         <TouchableOpacity
                             style={styles.commandButton}
-                            onPress={() => handleCommand({ intent: 're_trai' ,params:{"angle" : 90 , "unit" : "deg"}})}
+                            onPress={() => handleCommand(
+                                { 
+                                    intent: 're_trai' ,
+                                    params:{
+                                        "angle" : 90 ,
+                                         "unit" : "deg"
+                                    }
+                                }
+                            )}
                         >
                             <FontAwesome5 size={32} name="undo" color="#34C759" />
                             <ThemedText style={styles.commandText}>Rẽ trái</ThemedText>
