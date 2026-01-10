@@ -113,7 +113,3 @@ npm run lint       # Run ESLint
 eas build --platform android
 eas build --platform ios
 ```
-
-## License
-
-Private
