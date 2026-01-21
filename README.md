@@ -120,106 +120,113 @@ eas build --platform ios
 
 ```mermaid
 flowchart TD
-    Start([Người dùng trên Control Screen]) --> CheckType{Loại lệnh?}
+    Start([Bắt đầu]) --> Input[/Người dùng nhấn nút điều khiển/]
+    Input --> Decision1{Loại lệnh?}
     
-    CheckType -->|Nhấn nút<br/>Quick Command| ManualFlow[Lệnh Manual]
-    CheckType -->|Nhấn nút<br/>Microphone| VoiceFlow[Lệnh Giọng Nói]
+    Decision1 -->|Voice| Voice1[Nhấn nút Microphone]
+    Decision1 -->|Manual| Manual1[Nhấn nút Quick Command]
     
-    %% Manual Command Flow
-    ManualFlow --> CheckRobot1{connectedRobotId<br/>có tồn tại?}
-    CheckRobot1 -->|No| Alert1[Alert: Hãy kết nối robot trước]
-    Alert1 --> End1([End])
+    %% Manual Flow
+    Manual1 --> Decision2{connectedRobotId<br/>tồn tại?}
+    Decision2 -->|Không| Error1[Hiển thị lỗi:<br/>Hãy kết nối robot]
+    Error1 --> End1([Kết thúc])
     
-    CheckRobot1 -->|Yes| CheckWS1{WebSocket<br/>đã kết nối?}
-    CheckWS1 -->|No| Alert2[Alert: WebSocket chưa kết nối]
-    Alert2 --> End2([End])
+    Decision2 -->|Có| Decision3{WebSocket<br/>đã kết nối?}
+    Decision3 -->|Không| Error2[Hiển thị lỗi:<br/>WebSocket chưa kết nối]
+    Error2 --> End2([Kết thúc])
     
-    CheckWS1 -->|Yes| BuildCommand[Tạo command object:<br/>{intent, params}]
-    BuildCommand --> SendManual[wsService.sendCommand<br/>command, 'command']
-    SendManual --> AddHistory1[addCommand to history]
-    AddHistory1 --> CheckLift{Nút Nâng/Hạ?}
-    CheckLift -->|Yes| ToggleState[Toggle liftState<br/>0 ↔ 1]
-    CheckLift -->|No| UpdateUI1[Update UI]
-    ToggleState --> UpdateUI1
-    UpdateUI1 --> End3([End])
+    Decision3 -->|Có| Process1[Tạo command object]
+    Process1 --> Process2[Gửi lệnh qua WebSocket]
+    Process2 --> Process3[Lưu vào lịch sử]
+    Process3 --> Process4[Cập nhật UI]
+    Process4 --> End3([Kết thúc])
     
-    %% Voice Command Flow
-    VoiceFlow --> CheckRobot2{connectedRobotId<br/>có tồn tại?}
-    CheckRobot2 -->|No| Alert3[Alert: Hãy kết nối robot trước]
-    Alert3 --> End4([End])
+    %% Voice Flow
+    Voice1 --> Decision4{connectedRobotId<br/>tồn tại?}
+    Decision4 -->|Không| Error3[Hiển thị lỗi:<br/>Hãy kết nối robot]
+    Error3 --> End4([Kết thúc])
     
-    CheckRobot2 -->|Yes| CheckRecording{Đang recording?}
+    Decision4 -->|Có| Decision5{Đang<br/>recording?}
     
-    CheckRecording -->|No| CheckPerm{Có quyền<br/>microphone?}
-    CheckPerm -->|No| ReqPerm[Request Permission]
-    ReqPerm --> PermGranted{Permission<br/>granted?}
-    PermGranted -->|No| Alert4[Alert: Cần cấp quyền micro]
-    Alert4 --> End5([End])
+    Decision5 -->|Không| Decision6{Có quyền<br/>microphone?}
+    Decision6 -->|Không| Process5[Yêu cầu quyền]
+    Process5 --> Decision7{Cấp quyền?}
+    Decision7 -->|Không| Error4[Hiển thị lỗi:<br/>Cần quyền micro]
+    Error4 --> End5([Kết thúc])
+    Decision7 -->|Có| Process6[Bắt đầu ghi âm]
+    Decision6 -->|Có| Process6
+    Process6 --> Process7[Đặt isRecording = true]
+    Process7 --> End6([Kết thúc])
     
-    PermGranted -->|Yes| StartRec[voiceService.startRecording]
-    CheckPerm -->|Yes| StartRec
-    StartRec --> SetRecTrue[isRecording = true]
-    SetRecTrue --> ShowMicActive[UI: Icon mic active]
-    ShowMicActive --> End6([Chờ user nhấn lại...])
+    Decision5 -->|Có| Process8[Dừng ghi âm]
+    Process8 --> Process9[Chuyển audio sang base64]
+    Process9 --> Process10[Gửi đến Gemini API]
+    Process10 --> Process11[Nhận text từ Gemini]
+    Process11 --> Decision8{Text có<br/>nội dung?}
     
-    CheckRecording -->|Yes| StopRec[voiceService.stopRecording]
-    StopRec --> GetAudio[Lấy audio URI]
-    GetAudio --> ConvertB64[Convert to base64]
-    ConvertB64 --> CallGemini[Gửi đến Gemini API]
-    CallGemini --> Transcribe[Gemini transcribe<br/>audio → text]
-    Transcribe --> CheckText{Text có<br/>nội dung?}
+    Decision8 -->|Không| Error5[Hiển thị lỗi:<br/>Không nhận được giọng nói]
+    Error5 --> End7([Kết thúc])
     
-    CheckText -->|No| Alert5[Alert: Không nhận được giọng nói]
-    Alert5 --> SetRecFalse1[isRecording = false]
-    SetRecFalse1 --> End7([End])
+    Decision8 -->|Có| Decision9{WebSocket<br/>đã kết nối?}
+    Decision9 -->|Không| Error6[Hiển thị lỗi:<br/>WebSocket chưa kết nối]
+    Error6 --> End8([Kết thúc])
     
-    CheckText -->|Yes| CheckWS2{WebSocket<br/>đã kết nối?}
-    CheckWS2 -->|No| Alert6[Alert: WebSocket chưa kết nối]
-    Alert6 --> SetRecFalse2[isRecording = false]
-    SetRecFalse2 --> End8([End])
-    
-    CheckWS2 -->|Yes| SendVoice[wsService.sendCommand<br/>text, 'text']
-    SendVoice --> AddHistory2[addCommand to history]
-    AddHistory2 --> SetRecFalse3[isRecording = false]
-    SetRecFalse3 --> ShowMicInactive[UI: Icon mic inactive]
-    ShowMicInactive --> End9([End])
-    
-    %% Styling
-    classDef processClass fill:#4A90E2,stroke:#2E5C8A,stroke-width:2px,color:#fff
-    classDef decisionClass fill:#F5A623,stroke:#C77D00,stroke-width:2px,color:#fff
-    classDef alertClass fill:#E74C3C,stroke:#C0392B,stroke-width:2px,color:#fff
-    classDef startEndClass fill:#2ECC71,stroke:#27AE60,stroke-width:3px,color:#fff
-    
-    class ManualFlow,VoiceFlow,BuildCommand,SendManual,AddHistory1,ToggleState,UpdateUI1,StartRec,SetRecTrue,ShowMicActive,StopRec,GetAudio,ConvertB64,CallGemini,Transcribe,SendVoice,AddHistory2,SetRecFalse1,SetRecFalse2,SetRecFalse3,ShowMicInactive,ReqPerm processClass
-    class CheckType,CheckRobot1,CheckWS1,CheckLift,CheckRobot2,CheckRecording,CheckPerm,PermGranted,CheckText,CheckWS2 decisionClass
-    class Alert1,Alert2,Alert3,Alert4,Alert5,Alert6 alertClass
-    class Start,End1,End2,End3,End4,End5,End6,End7,End8,End9 startEndClass
+    Decision9 -->|Có| Process12[Gửi text qua WebSocket]
+    Process12 --> Process13[Lưu vào lịch sử]
+    Process13 --> Process14[Đặt isRecording = false]
+    Process14 --> End9([Kết thúc])
 ```
 
-### Giải Thích Các Nhánh If-Else:
+### Chú Thích Ký Hiệu:
 
-**1. Loại lệnh:**
-- `if (userClickMicrophone)` → Voice Flow
-- `else if (userClickQuickCommand)` → Manual Flow
+- **Hình Oval** `([])`: Bắt đầu / Kết thúc
+- **Hình Bình Hành** `[/\]`: Input / Output
+- **Hình Chữ Nhật** `[]`: Process (Xử lý)
+- **Hình Thoi** `{}`: Decision (Điều kiện if-else)
 
-**2. Voice Flow - Kiểm tra trạng thái:**
-- `if (!connectedRobotId)` → Alert & Exit
-- `else if (isRecording)` → Stop & Process
-- `else if (!isRecording)` → Start Recording
-  - `if (!hasMicPermission)` → Request → `if (!granted)` → Alert & Exit
-  - `else` → Start Recording
+### Giải Thích Luồng:
 
-**3. Voice Flow - Xử lý kết quả:**
-- `if (text.isEmpty)` → Alert & Exit
-- `else if (!wsConnected)` → Alert & Exit
-- `else` → Send Command
+**Manual Command Flow:**
+```
+if (loại lệnh == Manual) {
+    if (connectedRobotId không tồn tại) {
+        hiển thị lỗi;
+    } else if (WebSocket chưa kết nối) {
+        hiển thị lỗi;
+    } else {
+        tạo command → gửi qua WebSocket → lưu lịch sử → cập nhật UI;
+    }
+}
+```
 
-**4. Manual Flow:**
-- `if (!connectedRobotId)` → Alert & Exit
-- `else if (!wsConnected)` → Alert & Exit
-- `else` → Send Command
-  - `if (buttonType === 'lift')` → Toggle State
-  - `else` → Normal Update
+**Voice Command Flow:**
+```
+if (loại lệnh == Voice) {
+    if (connectedRobotId không tồn tại) {
+        hiển thị lỗi;
+    } else if (đang recording) {
+        dừng ghi âm;
+        if (text rỗng) {
+            hiển thị lỗi;
+        } else if (WebSocket chưa kết nối) {
+            hiển thị lỗi;
+        } else {
+            gửi text qua WebSocket → lưu lịch sử;
+        }
+    } else {
+        if (không có quyền micro) {
+            yêu cầu quyền;
+            if (không cấp quyền) {
+                hiển thị lỗi;
+            } else {
+                bắt đầu ghi âm;
+            }
+        } else {
+            bắt đầu ghi âm;
+        }
+    }
+}
+```
 
 ## License
 
